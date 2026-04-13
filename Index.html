@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASGBD // Tests</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+–bg: #0a0a0f;
+–bg2: #0f0f1a;
+–bg3: #13131f;
+–border: #1e2a3a;
+–accent: #00d4ff;
+–accent2: #0099cc;
+–green: #00ff88;
+–red: #ff3355;
+–yellow: #ffcc00;
+–orange: #ff8800;
+–text: #c8d8e8;
+–text2: #6a8a9a;
+–text3: #3a5a6a;
+–glow: 0 0 10px rgba(0,212,255,0.3);
+–glow-green: 0 0 10px rgba(0,255,136,0.3);
+–glow-red: 0 0 10px rgba(255,51,85,0.3);
+}
+
+- { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘Share Tech Mono’, monospace;
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+/* Scanlines */
+body::before {
+content:’’;
+position:fixed;
+top:0; left:0; right:0; bottom:0;
+background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
+pointer-events:none;
+z-index:9999;
+}
+
+/* Grid bg */
+body::after {
+content:’’;
+position:fixed;
+top:0; left:0; right:0; bottom:0;
+background-image:
+linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+background-size: 40px 40px;
+pointer-events:none;
+z-index:0;
+}
+
+#app {
+position: relative;
+z-index:1;
+max-width: 900px;
+margin: 0 auto;
+padding: 20px;
+}
+
+/* ── HEADER ── */
+header {
+text-align: center;
+padding: 40px 0 30px;
+border-bottom: 1px solid var(–border);
+margin-bottom: 30px;
+}
+
+.header-tag {
+font-family:‘Share Tech Mono’, monospace;
+color: var(–text3);
+font-size: 11px;
+letter-spacing: 3px;
+margin-bottom: 10px;
+}
+
+h1 {
+font-family: ‘Orbitron’, sans-serif;
+font-weight: 900;
+font-size: clamp(28px, 5vw, 48px);
+color: var(–accent);
+text-shadow: var(–glow), 0 0 40px rgba(0,212,255,0.2);
+letter-spacing: 4px;
+line-height: 1.1;
+}
+
+h1 span {
+color: var(–text2);
+font-size: 0.6em;
+font-weight: 400;
+}
+
+.header-sub {
+margin-top: 12px;
+color: var(–text3);
+font-size: 12px;
+letter-spacing: 2px;
+}
+
+.blink {
+animation: blink 1.2s step-end infinite;
+}
+@keyframes blink { 50% { opacity:0; } }
+
+/* ── MODULE SELECT ── */
+#module-screen { animation: fadeIn 0.4s ease; }
+#quiz-screen { display:none; animation: fadeIn 0.4s ease; }
+#results-screen { display:none; animation: fadeIn 0.4s ease; }
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+.screen-title {
+font-family: ‘Share Tech Mono’, monospace;
+color: var(–text2);
+font-size: 12px;
+letter-spacing: 3px;
+margin-bottom: 20px;
+}
+.screen-title::before { content:’> ’; color: var(–accent); }
+
+.modules-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+gap: 12px;
+margin-bottom: 24px;
+}
+
+.module-card {
+background: var(–bg2);
+border: 1px solid var(–border);
+padding: 18px 20px;
+cursor: pointer;
+transition: all 0.2s;
+position: relative;
+overflow: hidden;
+}
+
+.module-card::before {
+content:’’;
+position:absolute;
+top:0; left:0;
+width:3px; height:100%;
+background: var(–accent);
+opacity:0;
+transition:opacity 0.2s;
+}
+
+.module-card:hover {
+border-color: var(–accent);
+background: var(–bg3);
+transform: translateX(3px);
+box-shadow: var(–glow);
+}
+.module-card:hover::before { opacity:1; }
+
+.module-card.active {
+border-color: var(–accent);
+background: var(–bg3);
+}
+.module-card.active::before { opacity:1; }
+
+.module-id {
+font-family:‘Orbitron’, sans-serif;
+font-size: 10px;
+color: var(–accent);
+letter-spacing: 2px;
+margin-bottom: 6px;
+}
+
+.module-name {
+font-size: 14px;
+color: var(–text);
+line-height: 1.4;
+}
+
+.module-count {
+margin-top: 8px;
+font-size: 11px;
+color: var(–text3);
+}
+
+.module-all {
+background: var(–bg2);
+border: 1px dashed var(–border);
+padding: 14px 20px;
+cursor:pointer;
+transition:all 0.2s;
+display:flex;
+align-items:center;
+gap:12px;
+margin-bottom: 24px;
+}
+.module-all:hover {
+border-color: var(–yellow);
+box-shadow: 0 0 10px rgba(255,204,0,0.2);
+}
+.module-all-icon { color: var(–yellow); font-size:18px; }
+.module-all-text { font-size:13px; color: var(–text2); }
+.module-all-text strong { color: var(–yellow); display:block; font-size:14px; }
+
+/* ── BUTTONS ── */
+.btn {
+font-family:‘Share Tech Mono’, monospace;
+font-size:13px;
+padding:10px 24px;
+border:1px solid;
+background:transparent;
+cursor:pointer;
+letter-spacing:2px;
+transition:all 0.2s;
+text-transform:uppercase;
+}
+
+.btn-primary {
+border-color: var(–accent);
+color: var(–accent);
+}
+.btn-primary:hover {
+background: var(–accent);
+color: var(–bg);
+box-shadow: var(–glow);
+}
+
+.btn-secondary {
+border-color: var(–border);
+color: var(–text2);
+}
+.btn-secondary:hover {
+border-color: var(–text2);
+color: var(–text);
+}
+
+.btn-success {
+border-color: var(–green);
+color: var(–green);
+}
+.btn-success:hover {
+background: var(–green);
+color: var(–bg);
+box-shadow: var(–glow-green);
+}
+
+/* ── QUIZ ── */
+.quiz-header {
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom: 20px;
+padding-bottom: 16px;
+border-bottom: 1px solid var(–border);
+flex-wrap: wrap;
+gap: 10px;
+}
+
+.quiz-module-label {
+font-family:‘Orbitron’, sans-serif;
+font-size:11px;
+color: var(–accent);
+letter-spacing:2px;
+}
+
+.quiz-progress {
+font-size:12px;
+color: var(–text3);
+}
+
+.quiz-score {
+font-size:12px;
+color: var(–green);
+}
+
+.progress-bar-wrap {
+height:2px;
+background: var(–border);
+margin-bottom:24px;
+overflow:hidden;
+}
+.progress-bar-fill {
+height:100%;
+background: linear-gradient(90deg, var(–accent2), var(–accent));
+transition: width 0.4s ease;
+box-shadow: var(–glow);
+}
+
+.question-box {
+background: var(–bg2);
+border: 1px solid var(–border);
+padding: 24px;
+margin-bottom: 16px;
+}
+
+.question-type-badge {
+font-size:10px;
+color: var(–text3);
+letter-spacing:2px;
+margin-bottom:12px;
+}
+
+.question-text {
+font-size:15px;
+line-height:1.7;
+color: var(–text);
+margin-bottom:20px;
+}
+
+.question-text code {
+background: var(–bg3);
+color: var(–yellow);
+padding: 2px 6px;
+font-family:‘Share Tech Mono’,monospace;
+font-size:13px;
+border: 1px solid var(–border);
+}
+
+.question-text pre {
+background: var(–bg3);
+border: 1px solid var(–border);
+border-left: 3px solid var(–accent);
+padding:12px;
+margin:10px 0;
+font-size:12px;
+color: var(–yellow);
+overflow-x:auto;
+line-height:1.6;
+}
+
+/* Options */
+.options-list {
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+
+.option-item {
+display:flex;
+align-items:flex-start;
+gap:12px;
+padding:12px 16px;
+border:1px solid var(–border);
+background: var(–bg3);
+cursor:pointer;
+transition:all 0.15s;
+user-select:none;
+}
+
+.option-item:hover:not(.disabled) {
+border-color: var(–accent2);
+background: rgba(0,212,255,0.04);
+}
+
+.option-item.selected {
+border-color: var(–accent);
+background: rgba(0,212,255,0.08);
+}
+
+.option-item.correct {
+border-color: var(–green);
+background: rgba(0,255,136,0.06);
+}
+
+.option-item.incorrect {
+border-color: var(–red);
+background: rgba(255,51,85,0.06);
+}
+
+.option-item.correct-missed {
+border-color: var(–yellow);
+background: rgba(255,204,0,0.06);
+}
+
+.option-marker {
+width:20px;
+height:20px;
+border:1px solid var(–text3);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:11px;
+flex-shrink:0;
+margin-top:1px;
+font-family:‘Orbitron’,sans-serif;
+transition:all 0.15s;
+}
+
+.option-item.selected .option-marker {
+border-color: var(–accent);
+color: var(–accent);
+background: rgba(0,212,255,0.1);
+}
+
+.option-item.correct .option-marker {
+border-color: var(–green);
+color: var(–green);
+background: rgba(0,255,136,0.15);
+}
+
+.option-item.incorrect .option-marker {
+border-color: var(–red);
+color: var(–red);
+background: rgba(255,51,85,0.15);
+}
+
+.option-item.correct-missed .option-marker {
+border-color: var(–yellow);
+color: var(–yellow);
+background: rgba(255,204,0,0.12);
+}
+
+.option-text {
+font-size:13px;
+line-height:1.6;
+color: var(–text);
+}
+
+/* Fill in blank */
+.fill-input-wrap { margin-top:4px; }
+.fill-input {
+background: var(–bg3);
+border:1px solid var(–border);
+color: var(–text);
+font-family:‘Share Tech Mono’,monospace;
+font-size:14px;
+padding:10px 16px;
+width:100%;
+max-width:400px;
+outline:none;
+transition:border-color 0.2s;
+}
+.fill-input:focus { border-color: var(–accent); box-shadow: var(–glow); }
+.fill-input.correct { border-color: var(–green); }
+.fill-input.incorrect { border-color: var(–red); }
+
+/* Matching */
+.matching-grid {
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+.match-row {
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+align-items:center;
+}
+.match-left {
+font-size:13px;
+color: var(–text2);
+padding:8px 12px;
+border:1px solid var(–border);
+background: var(–bg3);
+}
+.match-select {
+background: var(–bg3);
+border:1px solid var(–border);
+color: var(–text);
+font-family:‘Share Tech Mono’,monospace;
+font-size:12px;
+padding:8px 12px;
+outline:none;
+cursor:pointer;
+transition:border-color 0.2s;
+width:100%;
+}
+.match-select:focus { border-color: var(–accent); }
+.match-select.correct { border-color: var(–green); }
+.match-select.incorrect { border-color: var(–red); }
+
+/* Ordering */
+.order-list { display:flex; flex-direction:column; gap:8px; }
+.order-item {
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px 14px;
+border:1px solid var(–border);
+background: var(–bg3);
+}
+.order-num-input {
+width:50px;
+background: var(–bg);
+border:1px solid var(–border);
+color: var(–accent);
+font-family:‘Share Tech Mono’,monospace;
+font-size:14px;
+text-align:center;
+padding:6px;
+outline:none;
+transition:border-color 0.2s;
+}
+.order-num-input:focus { border-color: var(–accent); }
+.order-num-input.correct { border-color: var(–green); color: var(–green); }
+.order-num-input.incorrect { border-color: var(–red); color: var(–red); }
+.order-text { font-size:13px; color: var(–text); line-height:1.5; }
+
+/* Feedback */
+.feedback-box {
+margin-top:14px;
+padding:14px 18px;
+border-left:3px solid;
+font-size:13px;
+line-height:1.6;
+display:none;
+}
+.feedback-box.correct {
+border-color: var(–green);
+background: rgba(0,255,136,0.04);
+color: var(–green);
+display:block;
+}
+.feedback-box.partial {
+border-color: var(–yellow);
+background: rgba(255,204,0,0.04);
+color: var(–yellow);
+display:block;
+}
+.feedback-box.incorrect {
+border-color: var(–red);
+background: rgba(255,51,85,0.04);
+color: var(–red);
+display:block;
+}
+.feedback-box .correct-answer {
+margin-top:6px;
+color: var(–text2);
+font-size:12px;
+}
+.feedback-box .correct-answer span { color: var(–yellow); }
+
+.quiz-actions {
+display:flex;
+gap:12px;
+margin-top:20px;
+flex-wrap:wrap;
+}
+
+/* ── RESULTS ── */
+.results-header {
+text-align:center;
+padding:30px 0;
+border-bottom:1px solid var(–border);
+margin-bottom:30px;
+}
+
+.results-score-big {
+font-family:‘Orbitron’,sans-serif;
+font-size:clamp(48px, 10vw, 80px);
+font-weight:900;
+line-height:1;
+margin:20px 0 10px;
+}
+
+.results-score-big.excellent { color: var(–green); text-shadow: var(–glow-green); }
+.results-score-big.good { color: var(–accent); text-shadow: var(–glow); }
+.results-score-big.average { color: var(–yellow); text-shadow: 0 0 10px rgba(255,204,0,0.3); }
+.results-score-big.poor { color: var(–red); text-shadow: var(–glow-red); }
+
+.results-label {
+font-size:12px;
+color: var(–text3);
+letter-spacing:3px;
+margin-bottom:8px;
+}
+
+.results-stats {
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:12px;
+margin-bottom:30px;
+}
+
+.stat-card {
+background: var(–bg2);
+border:1px solid var(–border);
+padding:16px;
+text-align:center;
+}
+
+.stat-value {
+font-family:‘Orbitron’,sans-serif;
+font-size:24px;
+font-weight:700;
+margin-bottom:4px;
+}
+
+.stat-value.green { color: var(–green); }
+.stat-value.red { color: var(–red); }
+.stat-value.yellow { color: var(–yellow); }
+
+.stat-label { font-size:11px; color: var(–text3); letter-spacing:1px; }
+
+.review-section h3 {
+font-family:‘Share Tech Mono’,monospace;
+color: var(–text2);
+font-size:12px;
+letter-spacing:3px;
+margin-bottom:16px;
+padding-bottom:8px;
+border-bottom:1px solid var(–border);
+}
+
+.review-item {
+background: var(–bg2);
+border:1px solid var(–border);
+border-left:3px solid var(–red);
+padding:16px 18px;
+margin-bottom:12px;
+}
+
+.review-item.partial { border-left-color: var(–yellow); }
+
+.review-q {
+font-size:13px;
+color: var(–text);
+margin-bottom:8px;
+line-height:1.5;
+}
+
+.review-answer {
+font-size:12px;
+color: var(–text3);
+}
+
+.review-answer span { color: var(–yellow); }
+
+.results-actions {
+display:flex;
+gap:12px;
+justify-content:center;
+flex-wrap:wrap;
+margin-top:30px;
+padding-top:20px;
+border-top:1px solid var(–border);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background: var(–bg); }
+::-webkit-scrollbar-thumb { background: var(–border); }
+::-webkit-scrollbar-thumb:hover { background: var(–text3); }
+
+@media (max-width:600px) {
+.match-row { grid-template-columns:1fr; }
+.results-stats { grid-template-columns:1fr; }
+}
+</style>
+
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="header-tag">// ADMINISTRACIÓN DE SISTEMAS GESTORES DE BASES DE DATOS</div>
+    <h1>ASGBD <span>// TESTS</span></h1>
+    <div class="header-sub">SISTEMA DE AUTOEVALUACIÓN <span class="blink">█</span></div>
+  </header>
+
+  <!-- MODULE SELECTION -->
+
+  <div id="module-screen">
+    <div class="screen-title">SELECCIONAR MÓDULO</div>
+
+```
+<div class="module-all" onclick="startQuiz('all')">
+  <div class="module-all-icon">⚡</div>
+  <div class="module-all-text">
+    <strong>TODOS LOS MÓDULOS</strong>
+    Preguntas mezcladas de toda la asignatura
+  </div>
+</div>
+
+<div class="modules-grid" id="modules-grid"></div>
+```
+
+  </div>
+
+  <!-- QUIZ -->
+
+  <div id="quiz-screen">
+    <div class="quiz-header">
+      <div class="quiz-module-label" id="quiz-module-label">MÓDULO 01</div>
+      <div class="quiz-progress" id="quiz-progress">PREGUNTA 1/10</div>
+      <div class="quiz-score" id="quiz-score">PUNTOS: 0</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+    <div id="question-container"></div>
+    <div class="quiz-actions" id="quiz-actions"></div>
+  </div>
+
+  <!-- RESULTS -->
+
+  <div id="results-screen">
+    <div class="results-header">
+      <div class="results-label">SESIÓN COMPLETADA</div>
+      <div class="results-score-big" id="results-score-display">--</div>
+      <div class="results-label" id="results-message">--</div>
+    </div>
+    <div class="results-stats">
+      <div class="stat-card"><div class="stat-value green" id="stat-correct">0</div><div class="stat-label">CORRECTAS</div></div>
+      <div class="stat-card"><div class="stat-value red" id="stat-incorrect">0</div><div class="stat-label">INCORRECTAS</div></div>
+      <div class="stat-card"><div class="stat-value yellow" id="stat-total">0</div><div class="stat-label">TOTAL</div></div>
+    </div>
+    <div class="review-section">
+      <h3>> REPASO DE ERRORES</h3>
+      <div id="review-list"></div>
+    </div>
+    <div class="results-actions">
+      <button class="btn btn-primary" onclick="restartModule()">REPETIR MÓDULO</button>
+      <button class="btn btn-secondary" onclick="goHome()">VOLVER AL INICIO</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// QUESTION BANK
+// ══════════════════════════════════════════════════════════
+const modules = [
+  {
+    id: 'ASGBD01',
+    name: 'Introducción a los SGBD y arquitectura',
+    questions: [
+      // --- Multi-choice ---
+      {
+        type:'multi',
+        text:'Los SGBD monocapa:',
+        options:[
+          'Incorporan asistentes para crear formularios.',
+          'Se emplean en hogares y pequeños negocios.',
+          'Soportan macros.',
+          'Son más potentes que los multicapa.',
+          'Suelen estar incorporados dentro de paquetes ofimáticos.'
+        ],
+        correct:[0,1,2,4]
+      },
+      // --- Single ---
+      {
+        type:'single',
+        text:'Las reglas que establecen el paso entre niveles se denominan:',
+        options:['Reglas de paso.','Correspondencias.','Transiciones.','No tienen un nombre específico.'],
+        correct:[1]
+      },
+      {
+        type:'single',
+        text:'En una base de datos determinada puede haber:',
+        options:[
+          'Un modelo interno y uno lógico, pero varios externos.',
+          'Varios modelos internos y externos, pero solo uno lógico.',
+          'Un modelo interno, pero varios lógicos y externos.',
+          'Varios modelos internos y lógicos, pero solo uno externo.'
+        ],
+        correct:[0]
+      },
+      {
+        type:'tf',
+        text:'El gestor de memoria intermedia se encarga de decidir qué datos quedan en memoria principal y cuales se envían a memoria caché.',
+        correct: true
+      },
+      {
+        type:'tf',
+        text:'El coste suele ser un factor importante a la hora de escoger el SGBD.',
+        correct: true
+      },
+      {
+        type:'single',
+        text:'La arquitectura ANSI/SPARC establece los niveles de abstracción:',
+        options:[
+          'Interno, lógico y conceptual.',
+          'Interno, conceptual y externo.',
+          'Lógico, conceptual y externo.',
+          'Interno y externo.'
+        ],
+        correct:[1]
+      },
+      {
+        type:'single',
+        text:'Si creamos una tabla "alumnos" en MySQL con el campo modulo_profesional de tipo ENUM(\'ASIR\',\'DAW\'), ¿se admitiría el valor \'Asir\' al hacer un INSERT?',
+        options:['Sí.','No.'],
+        correct:[0]
+      },
+      {
+        type:'fill',
+        text:'Un Sistema Gestor de Bases de Datos consiste en una colección de datos relacionados, junto con un ________ que facilita el acceso y control de esos datos.',
+        correct: 'software'
+      },
+      {
+        type:'tf',
+        text:'¿Es un factor determinante a la hora de elegir una BD el presupuesto con el que se cuente?',
+        correct: true
+      },
+      {
+        type:'fill',
+        text:'La sentencia empleada para limpiar los ficheros LOG es:',
+        correct: 'flush logs'
+      },
+      {
+        type:'single',
+        text:'Si clasificamos una BD según el criterio "precio de licencia" podemos clasificar en:',
+        options:['libres y privativos','ninguna de las anteriores es correcta','gratuitos y de pago'],
+        correct:[2]
+      },
+      {
+        type:'multi',
+        text:'¿Cuáles son clasificaciones válidas de un SGBD?',
+        options:[
+          'Número de conexiones concurrentes.',
+          'Modelo lógico.',
+          'Cantidad de idiomas que soporta.',
+          'Número de servidores en los que corre.'
+        ],
+        correct:[0,1]
+      },
+      {
+        type:'tf',
+        text:'Los programas de código libre son aquellos que permiten el acceso y libre distribución del código fuente, pero no su modificación.',
+        correct: false
+      },
+      {
+        type:'tf',
+        text:'La forma más habitual de trabajar con un SGBD monocapa es a través de una estructura cliente-servidor.',
+        correct: false
+      },
+      {
+        type:'multi',
+        text:'Cuáles de las siguientes afirmaciones referentes al Diccionario de Datos (DD) son ciertas:',
+        options:[
+          'Es una parte fundamental de cualquier BD.',
+          'Se crea en el momento de la instalación del SGBD.',
+          'Almacena todas las características de los datos guardados en las BD del servidor.',
+          'Antes de realizar cualquier operación sobre los datos reales de la BD por petición del usuario, el SGBD consulta el DD.'
+        ],
+        correct:[1,2,3]
+      },
+      {
+        type:'tf',
+        text:'No existen programas que ayudan a la realización de la documentación de una BD en su origen.',
+        correct: false
+      },
+      {
+        type:'tf',
+        text:'El acceso de aplicaciones que usan BDR a datos XML es una tarea sencilla.',
+        correct: true
+      },
+      {
+        type:'fill',
+        text:'Si deseamos instalar MySQL seleccionando distintas opciones en la instalación, deberemos escoger la distribución de ________.',
+        correct: 'código fuente'
+      },
+      {
+        type:'matching',
+        text:'Relaciona cada uno de los parámetros siguientes con sus acciones:',
+        pairs:[
+          { left:'Fichero de opciones.', right:'Guardar la configuración.' },
+          { left:'Con el servidor en marcha.', right:'Set nombre_variable = valor.' },
+          { left:'Set nombre_variable.', right:'Configurar variables dinámicas.' },
+          { left:'Al arrancar el servidor.', right:'Se incluyen valores usando guiones.' }
+        ]
+      },
+      {
+        type:'single',
+        text:'La diferencia entre ODBC y JDBC es:',
+        options:[
+          'No la hay, porque funcionan igual.',
+          'ODBC es un conector, pero JDBC es una API.',
+          'JDBC conecta aplicaciones programadas en Java.',
+          'ODBC conecta clientes con servidores.'
+        ],
+        correct:[2]
+      }
+    ]
+  },
+
+  {
+    id: 'ASGBD02',
+    name: 'Administración, seguridad y control de acceso',
+    questions: [
+      {
+        type:'tf',
+        text:'El DBA sólo debe preocuparse de que funcione el SGBD.',
+        correct: false
+      },
+      {
+        type:'fill',
+        text:'Un rol viene definido por el conjunto de ________ que se agrupan para realizar una serie de funciones.',
+        correct: 'permisos'
+      },
+      {
+        type:'fill',
+        text:'Un dato de carácter personal es cualquier información que permite ________ a una persona.',
+        correct: 'identificar'
+      },
+      {
+        type:'multi',
+        text:'¿Cuáles de las siguientes vistas se crean en la BD actual (Baloncesto)?',
+        options:[
+          'CREATE VIEW vista01 AS SELECT * FROM Jugadores;',
+          'CREATE VIEW soccer.vista01 AS SELECT * FROM Jugadores;',
+          'CREATE VIEW quidditch.vista01 AS SELECT * FROM Jugadores;',
+          'CREATE VIEW baloncesto.vista01 AS SELECT * FROM Jugadores;'
+        ],
+        correct:[0,3]
+      },
+      {
+        type:'tf',
+        text:'Los bloqueos se emplean para evitar que se corrompan los datos por accesos simultáneos y preservar la integridad y coherencia de la BD.',
+        correct: true
+      },
+      {
+        type:'fill',
+        text:'El bloqueo de tipo ________ restringe el acceso a los registros seleccionados a otras transacciones, aunque sea para lectura.',
+        correct: 'binario'
+      },
+      {
+        type:'tf',
+        text:'Todos los SGBD existentes hoy en día soportan el uso de roles de usuario.',
+        correct: false
+      },
+      {
+        type:'fill',
+        text:'Para visualizar los permisos que tiene un usuario empleamos el comando: ________',
+        correct: 'show grants'
+      },
+      {
+        type:'fill',
+        text:'De la política de accesos al SGBD depende la ________ del mismo.',
+        correct: 'seguridad'
+      },
+      {
+        type:'single',
+        text:'Selecciona la opción INCORRECTA. Al utilizar SET PASSWORD [FOR nombre_usuario] = \'contraseña\':',
+        options:[
+          'Nos obliga a introducir una contraseña ya encriptada.',
+          'Encriptamos la contraseña con la función PASSWORD().',
+          'Cambiamos la contraseña de un usuario.',
+          'Si no indico un nombre de usuario está cambiando la contraseña del que ejecuta la sentencia.'
+        ],
+        correct:[0]
+      },
+      {
+        type:'tf',
+        text:'En cuanto se ha realizado la comprobación de la cuenta de usuario y contraseña, el usuario ya puede operar en el sistema.',
+        correct: false
+      },
+      {
+        type:'multi',
+        text:'Si realizo el INSERT en la tabla mysql.user:',
+        options:[
+          'Puedo introducir la contraseña encriptada directamente.',
+          'No es la función PASSWORD(), porque se emplea otra.',
+          'Encripto la contraseña usando la función PASSWORD().',
+          'Introduzco la contraseña directamente.'
+        ],
+        correct:[0,2]
+      },
+      {
+        type:'single',
+        text:'Al utilizar la palabra PASSWORD en la sentencia CREATE USER:',
+        options:[
+          'Nos obliga a introducir la contraseña ya encriptada.',
+          'Creamos la contraseña.',
+          'Encriptamos la contraseña.',
+          'Esa opción no aparece.'
+        ],
+        correct:[0]
+      },
+      {
+        type:'tf',
+        text:'Para usar GRANT o REVOKE, debe tener el permiso GRANT OPTION además de los permisos que está dando o quitando.',
+        correct: true
+      },
+      {
+        type:'single',
+        text:'REVOKE:',
+        options:['quitar permisos de usuario','cambia el nombre de un usuario','proporciona permisos de usuarios'],
+        correct:[0]
+      },
+      {
+        type:'matching',
+        text:'Asocia el tipo de bloqueo con su acción:',
+        pairs:[
+          { left:'Exclusivo', right:'Una y sólo una transacción puede acceder al elemento, escribiendo datos.' },
+          { left:'Compartido', right:'Se pueden leer por varios a la vez, pero no actualizar.' }
+        ]
+      },
+      {
+        type:'single',
+        text:'Marca la opción INCORRECTA a la hora de asignar una máquina desde la que puede actuar un usuario usando GRANT:',
+        options:['@conta.administracion.net','@\'192.168.12.%\'','@%','@\'%\''],
+        correct:[2]
+      },
+      {
+        type:'single',
+        text:'Una cuenta de usuario (login) está formada por:',
+        options:[
+          'El nombre de usuario.',
+          'Los permisos de acceso a bases de datos.',
+          'Nombre de usuario y contraseña.',
+          'El nombre de usuario y máquina desde la que se conecta.'
+        ],
+        correct:[3]
+      },
+      {
+        type:'fill',
+        text:'En vistas a varias tablas, sólo se pueden listar las columnas de una de las tablas; a menos que en la definición de la vista se haya hecho utilizando ________.',
+        correct: 'inner join'
+      },
+      {
+        type:'matching',
+        text:'Asocia el comando con su resultado:',
+        pairs:[
+          { left:'RELOAD', right:'Refresca las tablas de permisos.' },
+          { left:'GRANT', right:'Proporciona permisos de usuario.' },
+          { left:'RENAME', right:'Cambia el nombre de un usuario.' },
+          { left:'REVOKE', right:'Quita permisos de un usuario.' }
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'ASGBD03',
+    name: 'Rutinas almacenadas: procedimientos, funciones, triggers y eventos',
+    questions: [
+      {
+        type:'single',
+        text:'Si llamamos a un método llamado ventas(idempleado) de la siguiente forma: SELECT ventas(\'14\'), ¿qué tipo de método es?',
+        options:[
+          'Este método es un procedimiento.',
+          'Ninguna de las anteriores es correcta.',
+          'Este método es una función.'
+        ],
+        correct:[2]
+      },
+      {
+        type:'single',
+        text:'Escoge el handler que NO se ajusta a la condición: "Error 1329 SQLSTATE: \'02000\' — No data - zero rows fetched":',
+        options:[
+          'DECLARE CONTINUE HANDLER FOR NOT FOUND SET fin = 1.',
+          'DECLARE CONTINUE HANDLER FOR 1329 SET fin = 1.',
+          'DECLARE CONTINUE HANDLER FOR SQLSTATE \'02000\' SET fin = 1.',
+          'DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET fin = 1.'
+        ],
+        correct:[3]
+      },
+      {
+        type:'single',
+        text:'Para llamar al procedimiento proc1(IN nombre VARCHAR(15)):',
+        options:[
+          'Uso: CALL proc1(\'PEDRO\')',
+          'Uso: SELECT proc1(\'PEDRO\')',
+          'Uso: CALL proc1()'
+        ],
+        correct:[0]
+      },
+      {
+        type:'tf',
+        text:'Al emplear el tipo EXIT, hay que provocar la condición que haga "saltar" el manejador con una SELECT...INTO nombre_variable.',
+        correct: true
+      },
+      {
+        type:'multi',
+        text:'Para eliminar un disparador (trigger):',
+        options:[
+          'También hay que eliminar la tabla a la que está asociado.',
+          'Se emplea la sentencia DROP TRIGGER.',
+          'Hay que eliminar el índice que asocia el trigger y la tabla.',
+          'Hay que usar el nombre del disparador y de la tabla.'
+        ],
+        correct:[1,3]
+      },
+      {
+        type:'single',
+        text:'El método que devuelve un único resultado es:',
+        options:['trigger','procedimiento','función'],
+        correct:[2]
+      },
+      {
+        type:'single',
+        text:'¿Cuántas veces entra en el bucle cuando se produce la llamada CALL proc(6)?\n\nCREATE PROCEDURE proc(num int)\nBEGIN\n  DECLARE contador INT default 0;\n  REPEAT\n    SET contador=contador+1;\n    SET veces=contador;\n  UNTIL (contador<num)\n  END REPEAT;\nEND',
+        options:['1','7','6'],
+        correct:[0]
+      },
+      {
+        type:'multi',
+        text:'Señala las opciones verdaderas sobre procedimientos y funciones:',
+        options:[
+          'Un parámetro de salida en un procedimiento va señalado por la palabra reservada OUT.',
+          'Las SELECT realizadas dentro de los procedimientos muestran su resultado si no son SELECT...INTO variable.',
+          'Los procedimientos se invocan con CALL y las funciones con SELECT.',
+          'Los procedimientos no devuelven valores y las funciones varios.'
+        ],
+        correct:[0,1,2]
+      },
+      {
+        type:'tf',
+        text:'Las sentencias SELECT realizadas dentro de una función muestran su resultado al terminar la ejecución de la misma.',
+        correct: false
+      },
+      {
+        type:'single',
+        text:'Cuál de las siguientes sentencias de CREATE EVENT es errónea:',
+        options:[
+          'AT CURRENT_TIMESTAMP - INTERVAL 1 YEAR DO UPDATE mitabla SET tiempo=CURTIME();',
+          'AT CURRENT_TIMESTAMP + INTERVAL 1 HOUR DO CALL miproc1(CURTIME());',
+          'EVERY 1 DAY DO UPDATE mitabla SET tiempo=CURTIME();',
+          'AT CURRENT_TIMESTAMP + INTERVAL 1 HOUR DO UPDATE mitabla SET tiempo=CURTIME();'
+        ],
+        correct:[0]
+      },
+      {
+        type:'matching',
+        text:'Analiza la función y relaciona sus componentes:\nCREATE FUNCTION funcion() RETURNS INTEGER DETERMINISTIC BEGIN DECLARE total INT; SELECT SUM(sueldo) INTO total FROM actores WHERE sexo=\'M\'; RETURN total; END',
+        pairs:[
+          { left:'Variables locales', right:'total' },
+          { left:'Tipo de método', right:'función' },
+          { left:'Parámetro de entrada', right:'ninguno' },
+          { left:'Tipo de dato que devuelve', right:'integer' }
+        ]
+      },
+      {
+        type:'fill',
+        text:'Los eventos son tareas que se programan para que se ejecuten en un momento de ________ fijado.',
+        correct: 'tiempo'
+      },
+      {
+        type:'multi',
+        text:'Los Handlers son elementos que se codifican dentro de:',
+        options:['Procedimientos.','Bucles y condiciones.','Eventos.','Funciones.'],
+        correct:[0,3]
+      },
+      {
+        type:'fill',
+        text:'Los procedimientos y las funciones son conocidos bajo el nombre genérico de ________ almacenadas.',
+        correct: 'rutinas'
+      },
+      {
+        type:'single',
+        text:'La siguiente declaración de evento ejecuta EVERY 1 MINUTE con STARTS=ahora y ENDS=ahora+1 HOUR. ¿Cuántas veces se ejecutará?',
+        options:['60 veces','1 vez','0 veces'],
+        correct:[0]
+      },
+      {
+        type:'fill',
+        text:'Los disparadores sirven para realizar operaciones sobre la base de datos de forma automática cuando sobre una tabla se realiza una operación de ________ de datos.',
+        correct: 'modificación'
+      },
+      {
+        type:'tf',
+        text:'Cuando event_scheduler está en modo DISABLED, se puede cambiar usando SET GLOBAL event_scheduler.',
+        correct: false
+      },
+      {
+        type:'tf',
+        text:'A la hora de documentar una rutina debemos especificar una serie de aspectos sobre ella con líneas de comentario.',
+        correct: true
+      },
+      {
+        type:'multi',
+        text:'Cuando se documenta una rutina:',
+        options:[
+          'Se indican las variables de entrada y salida de la rutina.',
+          'Se explica brevemente qué hace la rutina.',
+          'Se resaltan aquellos pasos que sean complicados o muy relevantes.',
+          'Se recoge la versión del SGBD y sobre qué tablas actúa.'
+        ],
+        correct:[0,1,2,3]
+      }
+    ]
+  },
+
+  {
+    id: 'ASGBD04',
+    name: 'Optimización, monitorización y rendimiento',
+    questions: [
+      {
+        type:'single',
+        text:'Aunque se puede usar OPTIMIZE TABLE con motores InnoDB, en este caso se recrea la tabla y después se ejecuta:',
+        options:['ANALYZE TABLE.','CREATE TABLE.','FLUSH TABLE.','ALTER TABLE.'],
+        correct:[0]
+      },
+      {
+        type:'fill',
+        text:'Una de las tareas principales del DBA cuando ya está el sistema en explotación, es realizar el ________ del servidor y del SGBD para comprobar su correcto funcionamiento.',
+        correct: 'seguimiento'
+      },
+      {
+        type:'single',
+        text:'La herramienta más conveniente será:',
+        options:[
+          'La más intrusiva: nos dará más información.',
+          'La menos intrusiva: afectará menos lo que pretendemos medir.',
+          'La menos rápida: hará cálculos lentos y precisos.',
+          'La más rápida: nos dará un resultado en poco tiempo.'
+        ],
+        correct:[1]
+      },
+      {
+        type:'tf',
+        text:'A la hora de gestionar aspectos de la BD no podemos contar con herramientas como eventos y disparadores.',
+        correct: false
+      },
+      {
+        type:'tf',
+        text:'Otros servicios, como NFS o LDAP, nunca interferirán en el funcionamiento de nuestro servidor de bases de datos.',
+        correct: false
+      },
+      {
+        type:'ordering',
+        text:'Ordena en qué orden se realizan las acciones de envío de una consulta:',
+        items:[
+          { text:'El motor de BD ejecuta el plan de ejecución.', order:4 },
+          { text:'El cliente envía la consulta al servidor.', order:1 },
+          { text:'El servidor analiza, realiza el proceso previo y optimiza la consulta.', order:3 },
+          { text:'El servidor envía el resultado, guardando una copia en caché.', order:5 },
+          { text:'El servidor comprueba la caché de consultas.', order:2 }
+        ]
+      },
+      {
+        type:'multi',
+        text:'Al hablar de trazas, son ciertas las siguientes sentencias:',
+        options:[
+          'Ayudan a determinar las causas por las que el servidor no funciona bien.',
+          'Es necesario tener habilitada la opción debug del servidor.',
+          'Es una buena idea reducir su tamaño con opciones, porque es muy grande.',
+          'Se usan para hacer caer el servidor y ver cuánto tarda en recuperar el funcionamiento normal.'
+        ],
+        correct:[0,1,2]
+      },
+      {
+        type:'fill',
+        text:'Reestructurar las consultas lentas nos ayudará a mejorar el ________ de nuestro servidor.',
+        correct: 'rendimiento'
+      },
+      {
+        type:'fill',
+        text:'Los índices, que son una ________ de datos, se definen con la intención de mejorar la velocidad de las operaciones.',
+        correct: 'estructura'
+      },
+      {
+        type:'multi',
+        text:'A la hora de medir la concurrencia:',
+        options:[
+          'Interesa medir el número de conexiones que realizan consultas.',
+          'Nos fijaremos en las peticiones recibidas por el servidor web.',
+          'Hay que ver si cae el rendimiento cuando aumenta la concurrencia.',
+          'Buscaremos un momento de máxima afluencia.'
+        ],
+        correct:[0,2,3]
+      },
+      {
+        type:'single',
+        text:'Un elemento que también puede afectar a la velocidad de ejecución de una consulta es:',
+        options:[
+          'La velocidad de procesamiento del procesador.',
+          'La temperatura del procesador del servidor.',
+          'Otras consultas en acceso concurrente.',
+          'La temperatura a la que se haya el servidor.'
+        ],
+        correct:[2]
+      },
+      {
+        type:'tf',
+        text:'La rapidez de realizar una consulta no entra dentro de los factores de costo de la misma.',
+        correct: true
+      },
+      {
+        type:'single',
+        text:'Empleando la memoria intermedia:',
+        options:[
+          'Gestiono su tasa de transferencia usando trazas.',
+          'Evito accesos al disco duro y así gano en velocidad.',
+          'Es mejor aún cuando se llena el disco con los ficheros log.',
+          'Puedo hacer volcados desde el motor InnoDB, que me aligeran el disco.'
+        ],
+        correct:[1]
+      },
+      {
+        type:'single',
+        text:'Ejecutar el arranque del servidor con la opción log:',
+        options:[
+          'Hace que se cuelgue el servidor.',
+          'Activa un sistema de avisos en la web del fabricante.',
+          'Podemos encontrar la causa que hizo caer al sistema.',
+          'Es algo que todo buen DBA debe hacer.'
+        ],
+        correct:[2]
+      },
+      {
+        type:'matching',
+        text:'Relaciona cada métrica con su significado:',
+        pairs:[
+          { left:'Número de solicitudes por segundo generadas en el servidor.', right:'Concurrencia.' },
+          { left:'Mide el tiempo total de una tarea.', right:'Tiempo de respuesta.' },
+          { left:'Medidas para sistemas de carga de trabajo variable.', right:'Escalabilidad.' },
+          { left:'Mide el rendimiento de la BD.', right:'Transacciones por unidad de tiempo.' }
+        ]
+      },
+      {
+        type:'fill',
+        text:'En el servidor resultan críticas las ________ de entrada/salida en disco para el funcionamiento del mismo.',
+        correct: 'operaciones'
+      },
+      {
+        type:'multi',
+        text:'El tiempo de latencia depende de:',
+        options:[
+          'Las peticiones recibidas por el servidor.',
+          'Si el disco es de tipo SATA, IDE o SCSI.',
+          'La velocidad de giro del disco.',
+          'El tiempo para mover la cabeza del lector.'
+        ],
+        correct:[2,3]
+      },
+      {
+        type:'fill',
+        text:'Cada conexión de un cliente tiene asociado un ________ dentro del proceso del servidor.',
+        correct: 'subproceso'
+      },
+      {
+        type:'tf',
+        text:'Las distintas opciones del comando SHOW nos dan información sobre todos los objetos que tenemos en la BD.',
+        correct: true
+      },
+      {
+        type:'single',
+        text:'Podemos aligerar velocidad de acceso a datos si:',
+        options:[
+          'Configuramos y usamos memoria caché, que es más rápida.',
+          'La velocidad del BUS nos limita la rapidez de acceso a disco.',
+          'Poniendo un procesador más rápido.',
+          'No podemos al no poder disminuir el tiempo de latencia.'
+        ],
+        correct:[0]
+      }
+    ]
+  },
+
+  {
+    id: 'ASGBD05',
+    name: 'Bases de datos distribuidas',
+    questions: [
+      {
+        type:'tf',
+        text:'Se tienen sistemas multibase si el acceso se realiza a través del procesador de datos distribuidos.',
+        correct: false
+      },
+      {
+        type:'fill',
+        text:'El esquema de fragmentación se compone de las ________ en las que hemos dividido una relación obtenida del esquema lógico global.',
+        correct: 'relaciones parciales'
+      },
+      {
+        type:'single',
+        text:'¿Es obligatorio que una BDD (Base de datos distribuida) tenga que estar físicamente en más de un ordenador?',
+        options:['No','Sí'],
+        correct:[1]
+      },
+      {
+        type:'tf',
+        text:'La independencia de la fragmentación pretende garantizar que debe ser transparente al usuario si una relación ha sido fragmentada.',
+        correct: true
+      },
+      {
+        type:'single',
+        text:'La razón por la que diferenciamos entre consultas distribuidas y locales es:',
+        options:[
+          'La consulta local es gestionada en sistemas federados.',
+          'La consulta local es más compleja de gestionar.',
+          'La consulta local no afecta al sistema distribuido.',
+          'La consulta local genera cuellos de botella.'
+        ],
+        correct:[2]
+      },
+      {
+        type:'single',
+        text:'Un sistema es multibase cuando:',
+        options:[
+          'Los procesadores de los nodos actúan independientemente.',
+          'Los nodos cuentan con sus propios usuarios.',
+          'Corremos peligro de que se formen cuellos de botella.',
+          'El acceso es a través del procesador distribuido.'
+        ],
+        correct:[0]
+      },
+      {
+        type:'matching',
+        text:'Relaciona cada propiedad con su significado:',
+        pairs:[
+          { left:'Distribución.', right:'Datos repartidos en varios nodos o centralizados.' },
+          { left:'Autonomía.', right:'Distribución del control sobre el sistema distribuido.' },
+          { left:'Homogeneidad.', right:'Idéntico SGBD para cada nodo o distintos.' }
+        ]
+      },
+      {
+        type:'tf',
+        text:'Al gestionar una máquina todas las peticiones de bloqueo puede provocar que se puedan formar cuellos de botella.',
+        correct: true
+      },
+      {
+        type:'single',
+        text:'Cuando el SGBD utilizado es el mismo para todas las BD locales:',
+        options:[
+          'El propio SGBD cuenta con herramientas para interconectar los nodos.',
+          'La BDD es heterogénea.',
+          'Necesariamente todos los nodos tienen el mismo sistema operativo.',
+          'Es porque el hardware empleado es el mismo para todos los nodos.'
+        ],
+        correct:[0]
+      },
+      {
+        type:'multi',
+        text:'Que los nodos no dependan de uno central garantiza que:',
+        options:[
+          'Se evite la posibilidad de crear cuellos de botella.',
+          'Se centralice la gestión de concurrencia.',
+          'Los nodos estén todos al mismo nivel.',
+          'Los servicios de gestión de transacciones, interbloqueos y consultas no dependan de un solo host.'
+        ],
+        correct:[0,2,3]
+      },
+      {
+        type:'multi',
+        text:'Para que la BD no sufra cambios semánticos al fragmentarla se deben cumplir las propiedades de:',
+        options:['Disyunción.','Distribución.','Completitud.','Reconstrucción.'],
+        correct:[0,2,3]
+      },
+      {
+        type:'fill',
+        text:'Los sistemas federados, o ________, permiten que el procesador local de cada nodo actúe de manera independiente.',
+        correct: 'semiautónomos'
+      },
+      {
+        type:'fill',
+        text:'Una transacción es una unidad de la ejecución de un programa que accede y puede actualizar ________ de datos.',
+        correct: 'elementos'
+      },
+      {
+        type:'ordering',
+        text:'Ordena los pasos del proceso para montar un sistema maestro-esclavo:',
+        items:[
+          { text:'Configurar maestro y esclavo.', order:2 },
+          { text:'Configurar las cuentas de replicación en cada servidor.', order:1 },
+          { text:'Instruir al esclavo para conectarse y actualizar su réplica desde el maestro.', order:3 }
+        ]
+      },
+      {
+        type:'single',
+        text:'Una traza es útil para:',
+        options:[
+          'Detectar los problemas que motiven una caída del servidor o que el servidor no funcione correctamente.',
+          'Ambas son correctas.',
+          'Trazar la ejecución de una sentencia SQL.'
+        ],
+        correct:[1]
+      },
+      {
+        type:'multi',
+        text:'Las estrategias posibles para realizar una consulta distribuida son:',
+        options:[
+          'Enviar relaciones a varios sitios para realizar consultas cruzadas.',
+          'Enviar copias de las relaciones allí donde se necesitan.',
+          'Descomponer la consulta en pares para enviar datos optimizados.',
+          'Realizar la consulta en el nodo central de la BDD.'
+        ],
+        correct:[0,1,2]
+      },
+      {
+        type:'tf',
+        text:'Cuando realizamos una fragmentación vertical (FV) las únicas columnas que hay en común entre los fragmentos son las que forman la clave.',
+        correct: true
+      },
+      {
+        type:'multi',
+        text:'Entre los factores a considerar para optimizar una consulta distribuida están:',
+        options:[
+          'El coste de la transmisión de los bloques de datos.',
+          'El tipo de SGBD que gestiona la consulta.',
+          'La velocidad relativa de procesamiento en cada sitio.',
+          'El volumen de los datos que se envían.'
+        ],
+        correct:[0,2,3]
+      },
+      {
+        type:'single',
+        text:'Las reglas que establecen el paso entre niveles se denominan:',
+        options:['transacciones','correspondencias','reglas de paso'],
+        correct:[1]
+      },
+      {
+        type:'tf',
+        text:'A la hora de optimizar el primer paso es echar un vistazo a las estadísticas: las de sistemas y las de los segmentos que vayan a participar en la consulta.',
+        correct: true
+      }
+    ]
+  }
+];
+
+// ══════════════════════════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════════════════════════
+let state = {
+  currentModule: null,
+  questions: [],
+  currentIndex: 0,
+  score: 0,
+  results: [],
+  answered: false,
+  selectedOptions: []
+};
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+function init() {
+  const grid = document.getElementById('modules-grid');
+  modules.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'module-card';
+    card.innerHTML = `
+      <div class="module-id">${m.id}</div>
+      <div class="module-name">${m.name}</div>
+      <div class="module-count">${m.questions.length} preguntas</div>
+    `;
+    card.onclick = () => startQuiz(m.id);
+    grid.appendChild(card);
+  });
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function startQuiz(moduleId) {
+  let questions;
+  let label;
+  if(moduleId==='all'){
+    questions = shuffle(modules.flatMap(m=>m.questions.map(q=>({...q,_mod:m.id}))));
+    label = 'TODOS LOS MÓDULOS';
+  } else {
+    const mod = modules.find(m=>m.id===moduleId);
+    questions = shuffle(mod.questions.map(q=>({...q,_mod:mod.id})));
+    label = `${mod.id} — ${mod.name}`;
+  }
+
+  state = {
+    currentModule: moduleId,
+    moduleLabel: label,
+    questions,
+    currentIndex: 0,
+    score: 0,
+    results: [],
+    answered: false,
+    selectedOptions: []
+  };
+
+  document.getElementById('module-screen').style.display='none';
+  document.getElementById('results-screen').style.display='none';
+  document.getElementById('quiz-screen').style.display='block';
+  document.getElementById('quiz-screen').style.animation='none';
+  document.getElementById('quiz-screen').offsetHeight;
+  document.getElementById('quiz-screen').style.animation='fadeIn 0.4s ease';
+
+  document.getElementById('quiz-module-label').textContent = moduleId==='all'?'TODOS LOS MÓDULOS':moduleId;
+  renderQuestion();
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER QUESTION
+// ══════════════════════════════════════════════════════════
+function renderQuestion() {
+  const q = state.questions[state.currentIndex];
+  const total = state.questions.length;
+  const idx = state.currentIndex;
+
+  document.getElementById('quiz-progress').textContent = `PREGUNTA ${idx+1}/${total}`;
+  document.getElementById('quiz-score').textContent = `PUNTOS: ${state.score.toFixed(0)}`;
+  document.getElementById('progress-bar').style.width = `${(idx/total)*100}%`;
+
+  state.answered = false;
+  state.selectedOptions = [];
+
+  let html = `<div class="question-box">`;
+  html += `<div class="question-type-badge">> ${getTypeLabel(q.type)}</div>`;
+
+  // Format question text (handle \n for code blocks)
+  let qText = q.text.replace(/\n/g,'<br>');
+  // Wrap code-like content
+  qText = qText.replace(/`([^`]+)`/g,'<code>$1</code>');
+  html += `<div class="question-text">${qText}</div>`;
+
+  if(q.type==='single'||q.type==='multi') {
+    html += `<div class="options-list" id="options-list">`;
+    const letters=['A','B','C','D','E'];
+    q.options.forEach((opt,i)=>{
+      html+=`<div class="option-item" id="opt-${i}" onclick="toggleOption(${i})">
+        <div class="option-marker" id="marker-${i}">${letters[i]}</div>
+        <div class="option-text">${opt}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if(q.type==='tf') {
+    html += `<div class="options-list" id="options-list">
+      <div class="option-item" id="opt-0" onclick="toggleOption(0)">
+        <div class="option-marker" id="marker-0">V</div>
+        <div class="option-text">Verdadero</div>
+      </div>
+      <div class="option-item" id="opt-1" onclick="toggleOption(1)">
+        <div class="option-marker" id="marker-1">F</div>
+        <div class="option-text">Falso</div>
+      </div>
+    </div>`;
+  }
+
+  if(q.type==='fill') {
+    html += `<div class="fill-input-wrap">
+      <input class="fill-input" id="fill-input" type="text" placeholder="Escribe tu respuesta..." autocomplete="off" onkeydown="if(event.key==='Enter')checkAnswer()">
+    </div>`;
+  }
+
+  if(q.type==='matching') {
+    const allRights = shuffle(q.pairs.map(p=>p.right));
+    html += `<div class="matching-grid" id="matching-grid">`;
+    q.pairs.forEach((p,i)=>{
+      html+=`<div class="match-row">
+        <div class="match-left">${p.left}</div>
+        <select class="match-select" id="match-${i}">
+          <option value="">— seleccionar —</option>
+          ${allRights.map(r=>`<option value="${r}">${r}</option>`).join('')}
+        </select>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if(q.type==='ordering') {
+    html += `<div class="order-list" id="order-list">`;
+    q.items.forEach((item,i)=>{
+      html+=`<div class="order-item">
+        <input class="order-num-input" id="order-${i}" type="number" min="1" max="${q.items.length}" placeholder="#">
+        <div class="order-text">${item.text}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div class="feedback-box" id="feedback-box"></div>`;
+  html += `</div>`;
+
+  document.getElementById('question-container').innerHTML = html;
+
+  // Actions
+  const actions = document.getElementById('quiz-actions');
+  actions.innerHTML = `<button class="btn btn-primary" id="btn-check" onclick="checkAnswer()">COMPROBAR</button>
+  <button class="btn btn-secondary" onclick="goHome()">SALIR</button>`;
+}
+
+function getTypeLabel(type){
+  const map={single:'OPCIÓN ÚNICA',multi:'VARIAS OPCIONES',tf:'VERDADERO / FALSO',fill:'COMPLETAR',matching:'RELACIONAR',ordering:'ORDENAR'};
+  return map[type]||type;
+}
+
+function toggleOption(i) {
+  if(state.answered) return;
+  const q = state.questions[state.currentIndex];
+  const el = document.getElementById(`opt-${i}`);
+  const marker = document.getElementById(`marker-${i}`);
+
+  if(q.type==='single'||q.type==='tf') {
+    // deselect all
+    state.selectedOptions = [];
+    document.querySelectorAll('.option-item').forEach(e=>e.classList.remove('selected'));
+    document.querySelectorAll('.option-marker').forEach(m=>{m.classList.remove('selected');});
+    state.selectedOptions = [i];
+    el.classList.add('selected');
+  } else {
+    // multi
+    const idx2 = state.selectedOptions.indexOf(i);
+    if(idx2===-1){
+      state.selectedOptions.push(i);
+      el.classList.add('selected');
+    } else {
+      state.selectedOptions.splice(idx2,1);
+      el.classList.remove('selected');
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// CHECK ANSWER
+// ══════════════════════════════════════════════════════════
+function checkAnswer() {
+  if(state.answered) return;
+  const q = state.questions[state.currentIndex];
+  state.answered = true;
+
+  let isCorrect = false;
+  let isPartial = false;
+  let feedbackHtml = '';
+  let pointsEarned = 0;
+  let correctAnswerText = '';
+
+  if(q.type==='single'||q.type==='tf') {
+    if(state.selectedOptions.length===0){ state.answered=false; showToast('Selecciona una opción'); return; }
+    const sel = state.selectedOptions[0];
+    const correctIdx = q.type==='tf' ? (q.correct?0:1) : q.correct[0];
+    isCorrect = sel===correctIdx;
+
+    // Mark options
+    document.querySelectorAll('.option-item').forEach(el=>el.classList.add('disabled'));
+    if(isCorrect){
+      document.getElementById(`opt-${sel}`).classList.remove('selected');
+      document.getElementById(`opt-${sel}`).classList.add('correct');
+    } else {
+      document.getElementById(`opt-${sel}`).classList.remove('selected');
+      document.getElementById(`opt-${sel}`).classList.add('incorrect');
+      document.getElementById(`opt-${correctIdx}`).classList.add('correct-missed');
+    }
+
+    pointsEarned = isCorrect ? 1 : 0;
+    if(q.type==='tf'){
+      correctAnswerText = q.correct ? 'Verdadero' : 'Falso';
+    } else {
+      correctAnswerText = q.options[correctIdx];
+    }
+
+  } else if(q.type==='multi') {
+    if(state.selectedOptions.length===0){ state.answered=false; showToast('Selecciona al menos una opción'); return; }
+    const sel = state.selectedOptions.sort((a,b)=>a-b);
+    const cor = q.correct.sort((a,b)=>a-b);
+    isCorrect = JSON.stringify(sel)===JSON.stringify(cor);
+    isPartial = !isCorrect && sel.some(s=>cor.includes(s));
+
+    document.querySelectorAll('.option-item').forEach(el=>el.classList.add('disabled'));
+    sel.forEach(i=>{
+      if(cor.includes(i)){
+        document.getElementById(`opt-${i}`).classList.remove('selected');
+        document.getElementById(`opt-${i}`).classList.add('correct');
+      } else {
+        document.getElementById(`opt-${i}`).classList.remove('selected');
+        document.getElementById(`opt-${i}`).classList.add('incorrect');
+      }
+    });
+    cor.forEach(i=>{
+      if(!sel.includes(i)){
+        document.getElementById(`opt-${i}`).classList.add('correct-missed');
+      }
+    });
+
+    if(isCorrect){ pointsEarned=1; }
+    else if(isPartial){ pointsEarned=0.5; }
+    const letters=['A','B','C','D','E'];
+    correctAnswerText = q.correct.map(i=>q.options[i]).join(' | ');
+
+  } else if(q.type==='fill') {
+    const inp = document.getElementById('fill-input');
+    if(!inp||!inp.value.trim()){ state.answered=false; showToast('Escribe tu respuesta'); return; }
+    const userVal = inp.value.trim().toLowerCase();
+    const correctVal = q.correct.toLowerCase();
+    isCorrect = userVal===correctVal || correctVal.includes(userVal) || userVal.includes(correctVal.split(' ')[0]);
+    inp.classList.add(isCorrect?'correct':'incorrect');
+    inp.disabled=true;
+    pointsEarned = isCorrect?1:0;
+    correctAnswerText = q.correct;
+
+  } else if(q.type==='matching') {
+    let allCorrect = true; let someCorrect=false;
+    q.pairs.forEach((p,i)=>{
+      const sel2 = document.getElementById(`match-${i}`);
+      if(!sel2) return;
+      const val = sel2.value;
+      const ok = val===p.right;
+      sel2.classList.add(ok?'correct':'incorrect');
+      sel2.disabled=true;
+      if(ok) someCorrect=true; else allCorrect=false;
+    });
+    isCorrect = allCorrect;
+    isPartial = !isCorrect && someCorrect;
+    pointsEarned = isCorrect?1:isPartial?0.5:0;
+    correctAnswerText = q.pairs.map(p=>`${p.left} → ${p.right}`).join(' | ');
+
+  } else if(q.type==='ordering') {
+    let allCorrect=true; let someCorrect=false;
+    q.items.forEach((item,i)=>{
+      const inp2 = document.getElementById(`order-${i}`);
+      if(!inp2) return;
+      const val = parseInt(inp2.value);
+      const ok = val===item.order;
+      inp2.classList.add(ok?'correct':'incorrect');
+      inp2.disabled=true;
+      if(ok) someCorrect=true; else allCorrect=false;
+    });
+    isCorrect=allCorrect;
+    isPartial=!isCorrect&&someCorrect;
+    pointsEarned=isCorrect?1:isPartial?0.5:0;
+    correctAnswerText = q.items.map(it=>`(${it.order}) ${it.text}`).join(' | ');
+  }
+
+  state.score += pointsEarned;
+
+  // Feedback
+  const fb = document.getElementById('feedback-box');
+  if(isCorrect){
+    fb.className='feedback-box correct';
+    fb.innerHTML='✓ CORRECTO';
+  } else if(isPartial){
+    fb.className='feedback-box partial';
+    fb.innerHTML=`⚡ PARCIALMENTE CORRECTO<div class="correct-answer">Respuesta completa: <span>${correctAnswerText}</span></div>`;
+  } else {
+    fb.className='feedback-box incorrect';
+    fb.innerHTML=`✗ INCORRECTO<div class="correct-answer">Respuesta correcta: <span>${correctAnswerText}</span></div>`;
+  }
+
+  // Store result
+  state.results.push({
+    question: q.text,
+    isCorrect,
+    isPartial,
+    points: pointsEarned,
+    correctAnswer: correctAnswerText
+  });
+
+  // Update score display
+  document.getElementById('quiz-score').textContent = `PUNTOS: ${state.score.toFixed(0)}`;
+
+  // Actions
+  const actions = document.getElementById('quiz-actions');
+  const isLast = state.currentIndex===state.questions.length-1;
+  actions.innerHTML = `<button class="btn btn-${isLast?'success':'primary'}" onclick="nextQuestion()">${isLast?'VER RESULTADOS':'SIGUIENTE →'}</button>
+  <button class="btn btn-secondary" onclick="goHome()">SALIR</button>`;
+}
+
+function nextQuestion() {
+  state.currentIndex++;
+  if(state.currentIndex>=state.questions.length){
+    showResults();
+  } else {
+    document.getElementById('quiz-screen').style.animation='none';
+    document.getElementById('quiz-screen').offsetHeight;
+    document.getElementById('quiz-screen').style.animation='fadeIn 0.3s ease';
+    renderQuestion();
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// RESULTS
+// ══════════════════════════════════════════════════════════
+function showResults() {
+  document.getElementById('quiz-screen').style.display='none';
+  const rs = document.getElementById('results-screen');
+  rs.style.display='block';
+  rs.style.animation='none'; rs.offsetHeight; rs.style.animation='fadeIn 0.4s ease';
+
+  const total = state.questions.length;
+  const correct = state.results.filter(r=>r.isCorrect).length;
+  const incorrect = state.results.filter(r=>!r.isCorrect&&!r.isPartial).length;
+  const pct = Math.round((state.score/total)*100);
+
+  const scoreEl = document.getElementById('results-score-display');
+  scoreEl.textContent = `${pct}%`;
+  scoreEl.className = 'results-score-big ' + (pct>=85?'excellent':pct>=65?'good':pct>=45?'average':'poor');
+
+  const msgs = {
+    excellent:['EXCELENTE — NIVEL MÁSTER','RENDIMIENTO ÓPTIMO','BASE DE DATOS DOMINADA'],
+    good:['BUEN TRABAJO','CONOCIMIENTO SÓLIDO','SIGUE PRACTICANDO'],
+    average:['NIVEL INTERMEDIO','REPASA LOS ERRORES','PUEDES MEJORAR'],
+    poor:['NECESITAS REPASAR','NIVEL INSUFICIENTE','VUELVE A ESTUDIAR']
+  };
+  const cat = pct>=85?'excellent':pct>=65?'good':pct>=45?'average':'poor';
+  document.getElementById('results-message').textContent = msgs[cat][Math.floor(Math.random()*3)];
+
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-incorrect').textContent = incorrect;
+  document.getElementById('stat-total').textContent = total;
+
+  // Review
+  const reviewList = document.getElementById('review-list');
+  const errors = state.results.filter(r=>!r.isCorrect);
+  if(errors.length===0){
+    reviewList.innerHTML='<div style="color:var(--green);font-size:13px;padding:16px 0">✓ ¡Sin errores! Puntuación perfecta.</div>';
+  } else {
+    reviewList.innerHTML = errors.map(r=>`
+      <div class="review-item ${r.isPartial?'partial':''}">
+        <div class="review-q">${r.question.length>120?r.question.substring(0,120)+'...':r.question}</div>
+        <div class="review-answer">Respuesta correcta: <span>${r.correctAnswer.length>150?r.correctAnswer.substring(0,150)+'...':r.correctAnswer}</span></div>
+      </div>
+    `).join('');
+  }
+}
+
+function restartModule() {
+  startQuiz(state.currentModule);
+}
+
+function goHome() {
+  document.getElementById('quiz-screen').style.display='none';
+  document.getElementById('results-screen').style.display='none';
+  document.getElementById('module-screen').style.display='block';
+  document.getElementById('module-screen').style.animation='none';
+  document.getElementById('module-screen').offsetHeight;
+  document.getElementById('module-screen').style.animation='fadeIn 0.4s ease';
+}
+
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a2a3a;border:1px solid var(--accent);color:var(--accent);padding:10px 20px;font-family:Share Tech Mono,monospace;font-size:13px;z-index:9998;pointer-events:none;transition:opacity 0.3s';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';},2000);
+}
+
+// ══════════════════════════════════════════════════════════
+// START
+// ══════════════════════════════════════════════════════════
+init();
+</script>
+
+</body>
+</html>
